@@ -58,5 +58,30 @@ namespace PriorityTaskQueue.Test {
 
       CollectionAssert.AreEqual(new[] { "A0", "B", "A1", "A2", "A3" }, handledItemsOrder);
     }
+
+    [TestMethod]
+    public void EnqueueSeveralSlowLowPriorityItemsWhichThrowExceptionsAndThenHighPriorityItem() {
+      List<string> handledItemsOrder = new List<string>();
+
+      var subject = new PriorityTaskQueue<string>(
+        item =>
+        {
+          handledItemsOrder.Add(item);
+          if (item.StartsWith("A")) {
+            Thread.Sleep(50);
+            throw new Exception("Simulating exception in handling method");
+          }
+        });
+
+      for (int i = 0; i < 4; i++) {
+        subject.Post("A" + i, 22);
+      }
+
+      subject.Post("B", 0);
+
+      subject.BusyTask.Wait();
+
+      CollectionAssert.AreEqual(new[] { "A0", "B", "A1", "A2", "A3" }, handledItemsOrder);
+    }
   }
 }

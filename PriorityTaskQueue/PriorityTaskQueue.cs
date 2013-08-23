@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PriorityTaskQueue {
+  /// <summary>
+  /// Priority FIFO task processing queue.
+  /// </summary>
+  /// <typeparam name="T"></typeparam>
   public class PriorityTaskQueue<T> {
 
     private readonly Action<T> handler;
@@ -20,6 +21,11 @@ namespace PriorityTaskQueue {
       queue = new PriorityQueue<T>();
     }
 
+    /// <summary>
+    /// Post item to be processed later in the queue.
+    /// </summary>
+    /// <param name="item">Item information</param>
+    /// <param name="priority">Lower value indicate higher priority.</param>
     public void Post(T item, int priority) {
       lock (locker) {
         queue.Enqueue(item, priority);
@@ -27,6 +33,10 @@ namespace PriorityTaskQueue {
       }
     }
 
+    /// <summary>
+    /// Internal Task that signal when all the items
+    /// in the queue were processed.
+    /// </summary>
     internal Task BusyTask {
       get { return tcs.Task; }
     }
